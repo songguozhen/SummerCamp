@@ -1212,7 +1212,8 @@ function switchPage(name) {
 // ── Calendar ──────────────────────────────────────────────────
 const CAL_MONTH_NAMES = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 const CAL_WDAYS = ['日','一','二','三','四','五','六'];
-const CAL_MONTHS_SHOWN = 12; // render this many months starting from current
+const now0 = new Date();
+const CAL_MONTHS_SHOWN = Math.max(1, 10 - now0.getMonth()); // current month through October
 
 function buildActMap() {
   const map = {};
