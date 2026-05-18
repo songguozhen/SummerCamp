@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏令营追踪器</title>
+<style>
+  :root {
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --border: #e2e8f0;
+    --border-focus: #4f46e5;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-light: #eef2ff;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --success: #22c55e;
+    --success-light: #f0fdf4;
+    --info: #3b82f6;
+    --info-light: #eff6ff;
+    --warning: #f59e0b;
+    --gray: #9ca3af;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --font: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+    --mono: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 32px;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* ── Panel ── */
+  .panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 18px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title-icon {
+    width: 24px;
+    height: 24px;
+    background: var(--accent-light);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+  .panel-body {
+    padding: 20px 24px;
+  }
+
+  /* ── Left panel ── */
+  .left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: fit-content;
+    position: sticky;
+    top: 84px;
+  }
+
+  /* ── Textarea ── */
+  .input-group { display: flex; flex-direction: column; gap: 8px; }
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  label.required::after { content: ' *'; color: var(--danger); }
+
+  textarea, input[type="text"], input[type="date"] {
+    width: 100%;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    outline: none;
+    resize: vertical;
+  }
+  textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+  }
+  textarea { min-height: 180px; line-height: 1.7; }
+  textarea::placeholder { color: var(--text-muted); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+    padding: 11px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { background: var(--text-muted); transform: none; box-shadow: none; cursor: not-allowed; }
+
+  .btn-save {
+    background: var(--accent);
+    color: #fff;
+    flex: 1;
+  }
+  .btn-save:hover { background: var(--accent-hover); }
+
+  .btn-ghost {
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--bg); color: var(--text-primary); }
+
+  .btn-danger-ghost {
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid var(--danger);
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .btn-danger-ghost:hover { background: var(--danger-light); }
+
+  .btn-confirm {
+    background: var(--danger);
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+  .btn-confirm:hover { background: #dc2626; }
+
+  .btn-cancel-sm {
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    padding: 5px 10px;
+    border: 1.5px solid var(--border);
+  }
+  .btn-cancel-sm:hover { background: var(--surface-2); }
+
+  /* ── Spinner ── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Error message ── */
+  .error-msg {
+    font-size: 13px;
+    color: var(--danger);
+    background: var(--danger-light);
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-xs);
+    padding: 10px 12px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* ── Confirmation form ── */
+  .confirm-form {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+  .confirm-form.visible { display: flex; }
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 -24px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    padding: 16px 0;
+  }
+  .form-grid .full-width { grid-column: 1 / -1; }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+  }
+
+  /* ── Sort controls ── */
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sort-btn {
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .sort-btn.active {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Count badge ── */
+  .count-badge {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  /* ── Entry list ── */
+  .entries-body { padding: 16px 20px; }
+
+  .entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Entry card ── */
+  .entry-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    transition: box-shadow .2s, border-color .2s, transform .2s, opacity .3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .entry-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .entry-card:hover { box-shadow: var(--shadow-md); border-color: #c7d2fe; transform: translateY(-1px); }
+  .entry-card:hover::before { opacity: 1; }
+  .entry-card.fading { opacity: 0; transform: translateX(20px) scale(.97); }
+  .entry-card.expired { opacity: .7; }
+  .entry-card.urgent { border-color: #fca5a5; }
+  .entry-card.urgent::before { background: var(--danger); opacity: 1; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .card-school-info { flex: 1; min-width: 0; }
+  .card-school {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-institute {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Status badge ── */
+  .status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+  .badge-expired { background: #f1f5f9; color: var(--gray); }
+  .badge-urgent { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+  .badge-open { background: var(--success-light); color: #16a34a; border: 1px solid #bbf7d0; }
+  .badge-upcoming { background: var(--info-light); color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .badge-unknown { background: #f1f5f9; color: var(--text-muted); }
+
+  /* ── Days countdown box ── */
+  .days-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    border: 2px solid;
+    line-height: 1;
+    gap: 2px;
+  }
+  .days-box-num {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .days-box-unit {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    opacity: .85;
+  }
+  .days-box-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-top: 1px;
+  }
+  .days-box.open   { background: var(--success-light); border-color: #86efac; color: #15803d; }
+  .days-box.urgent { background: #fef2f2; border-color: #fca5a5; color: var(--danger); }
+  .days-box.upcoming { background: var(--info-light); border-color: #93c5fd; color: #1d4ed8; }
+  .days-box.expired  { background: #f1f5f9; border-color: #e2e8f0; color: var(--gray); }
+  .days-box.unknown  { background: #f8fafc; border-color: #e2e8f0; color: var(--text-muted); }
+
+  .card-program {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .card-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .date-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+  .date-label {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11px;
+    width: 26px;
+    flex-shrink: 0;
+  }
+  .date-value { font-variant-numeric: tabular-nums; }
+  .date-value.deadline { color: var(--danger); font-weight: 600; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .card-notes {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .delete-area { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .delete-confirm {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--danger-light);
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-xs);
+    padding: 4px 10px 4px 8px;
+  }
+  .delete-confirm.visible { display: flex; }
+  .delete-btn-icon {
+    font-size: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .delete-btn-icon:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: .5; }
+  .empty-state-text { font-size: 15px; color: var(--text-secondary); margin-bottom: 6px; }
+  .empty-state-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* ── Loading state ── */
+  .list-loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 14px;
+    display: none;
+  }
+  .list-loading.visible { display: block; }
+
+  /* ── Nav tabs ── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-tab {
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .nav-tab:hover { background: var(--accent-light); color: var(--accent); }
+  .nav-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── Pages ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Calendar page ── */
+  #page-calendar {
+    background: #f2f3f0;
+    min-height: calc(100vh - 60px);
+  }
+  .cal-page-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 36px 60px;
+  }
+  .cal-page-hdr {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddddd8;
+  }
+  .cal-page-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.04em;
+    color: #18181b;
+    line-height: 1;
+  }
+  .cal-page-title span { color: #16a34a; }
+  .cal-legend2 {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .cal-legend2-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #777;
+    letter-spacing: .02em;
+  }
+  .cal-legend2-swatch {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+
+  /* months grid */
+  .cal-months-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  /* single month card */
+  .cal-mcard {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e4e4df;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.04);
+  }
+  .cal-mcard-hdr {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1px solid #f0f0eb;
+  }
+  .cal-mname {
+    font-size: 16px;
+    font-weight: 800;
+    color: #18181b;
+    letter-spacing: -.03em;
+  }
+  .cal-myear {
+    font-size: 11px;
+    font-weight: 600;
+    color: #aaa;
+    letter-spacing: .05em;
+  }
+  .cal-mcard-today-tag {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: #4f46e5;
+    background: #eef2ff;
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  /* weekday row */
+  .cal-wrow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #fafaf8;
+    border-bottom: 1px solid #f0f0eb;
+  }
+  .cal-wd {
+    text-align: center;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: #c0c0bb;
+    padding: 7px 0;
+    text-transform: uppercase;
+  }
+  .cal-wd.wknd { color: #f87171; opacity: .85; }
+
+  /* day cells */
+  .cal-cells {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .cal-cell {
+    aspect-ratio: 1;
+    position: relative;
+    border-right: 1px solid #f3f3ef;
+    border-bottom: 1px solid #f3f3ef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5px 3px 3px;
+    transition: background .12s;
+    overflow: hidden;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell.other-m { background: #fafaf8; }
+  .cal-cell.other-m .cal-dnum { color: #ddd; }
+
+  /* green activity fill */
+  .cal-cell.act::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 8px;
+    background: var(--act-bg, #bbf7d0);
+    transition: filter .15s;
+  }
+  .cal-cell.act:hover::before { filter: brightness(.93); }
+  .cal-cell.c1 { --act-bg: rgba(187,247,208,.85); }
+  .cal-cell.c2 { --act-bg: rgba(74,222,128,.82); }
+  .cal-cell.c3 { --act-bg: rgba(34,197,94,.88); }
+  .cal-cell.c4 { --act-bg: rgba(22,163,74,.92); }
+  .cal-cell.act { cursor: pointer; }
+
+  /* day number */
+  .cal-dnum {
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+  }
+  .cal-cell.is-today .cal-dnum {
+    background: #4f46e5;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(79,70,229,.4);
+  }
+  /* dot indicators */
+  .cal-dots {
+    display: flex;
+    gap: 2px;
+    position: relative;
+    z-index: 1;
+    margin-top: 3px;
+  }
+  .cal-dot {
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: #15803d;
+    opacity: .7;
+  }
+
+  /* ── Floating tooltip ── */
+  .cal-tip {
+    position: fixed;
+    z-index: 1000;
+    background: #18181b;
+    color: #f4f4f5;
+    font-size: 12px;
+    line-height: 1.65;
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.22);
+    max-width: 280px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .15s, transform .15s;
+    white-space: pre-line;
+  }
+  .cal-tip.show { opacity: 1; transform: translateY(0); }
+  .cal-tip-date {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #71717a;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+  .cal-tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 2px 0;
+  }
+  .cal-tip-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; padding: 16px; }
+    .left-panel { position: static; }
+    .cal-months-grid { grid-template-columns: 1fr; }
+    .cal-page-inner { padding: 20px 16px 40px; }
+  }
+  @media (max-width: 600px) {
+    .header { padding: 0 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .cal-page-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <div class="header-icon">🏕️</div>
+    <div>
+      <div class="header-title">夏令营追踪器</div>
+      <div class="header-sub">Summer Camp Tracker</div>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('list')">📋 追踪列表</button>
+    <button class="nav-tab" onclick="switchPage('calendar')">📅 活动日历</button>
+  </nav>
+</header>
+
+<div class="page active" id="page-list">
+<div class="layout">
+
+  <!-- ── Left panel ── -->
+  <aside class="left-panel">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon">📋</div>
+          粘贴通知文本
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="input-group">
+          <textarea id="rawText" placeholder="将夏令营通知文本粘贴到此处...&#10;&#10;示例：&#10;【中国科学院大学】——山西煤炭化学研究所&#10;报名时间：2026-05-16~2026-06-30&#10;活动时间：2026-07-13~2026-07-17"></textarea>
+        </div>
+        <div id="extractError" class="error-msg" style="margin-top:12px;"></div>
+        <button class="btn btn-primary" id="extractBtn" onclick="doExtract()" style="margin-top:14px;">
+          ✨ 提取信息
+        </button>
+      </div>
+
+      <!-- Confirmation form (hidden by default) -->
+      <div class="confirm-form" id="confirmForm">
+        <div class="form-divider"></div>
+        <div class="panel-body" style="padding-top:16px; padding-bottom:20px;">
+          <div style="font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:14px;">
+            ✅ 提取完成，请确认信息后保存
+          </div>
+          <div class="form-grid">
+            <div class="input-group full-width">
+              <label class="required">学校</label>
+              <input type="text" id="f_school" placeholder="大学/高校名称">
+            </div>
+            <div class="input-group full-width">
+              <label>学院 / 研究所</label>
+              <input type="text" id="f_institute" placeholder="学院或研究所名称（可选）">
+            </div>
+            <div class="input-group full-width">
+              <label class="required">项目名称</label>
+              <input type="text" id="f_program" placeholder="夏令营项目名称">
+            </div>
+            <div class="input-group">
+              <label>报名开始</label>
+              <input type="date" id="f_reg_start">
+            </div>
+            <div class="input-group">
+              <label style="color:var(--danger);">报名截止 *</label>
+              <input type="date" id="f_reg_end">
+            </div>
+            <div class="input-group">
+              <label>活动开始</label>
+              <input type="date" id="f_act_start">
+            </div>
+            <div class="input-group">
+              <label>活动结束</label>
+              <input type="date" id="f_act_end">
+            </div>
+            <div class="input-group full-width">
+              <label>备注</label>
+              <textarea id="f_notes" style="min-height:60px;" placeholder="备注信息（可选）"></textarea>
+            </div>
+          </div>
+          <div id="saveError" class="error-msg" style="margin-bottom:12px;"></div>
+          <div class="form-actions">
+            <button class="btn btn-save" onclick="doSave()">💾 保存</button>
+            <button class="btn btn-ghost" onclick="doReExtract()">🔄 重新提取</button>
+            <button class="btn btn-ghost" onclick="hideForm()">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Right panel ── -->
+  <main>
+    <div class="panel" style="height:100%;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon">🏕️</div>
+          已收录夏令营
+          <span class="count-badge" id="countBadge">0</span>
+        </div>
+        <div class="sort-controls">
+          <button class="sort-btn active" id="sortAsc" onclick="setSort('asc')">截止日期 ↑</button>
+          <button class="sort-btn" id="sortDesc" onclick="setSort('desc')">截止日期 ↓</button>
+        </div>
+      </div>
+      <div class="entries-body">
+        <div class="list-loading visible" id="listLoading">加载中...</div>
+        <div class="empty-state" id="emptyState">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-text">暂无记录</div>
+          <div class="empty-state-sub">粘贴通知文本并提取信息后开始添加</div>
+        </div>
+        <div class="entry-list" id="entryList"></div>
+      </div>
+    </div>
+  </main>
+
+</div>
+</div><!-- /page-list -->
+
+<!-- ── Calendar page ── -->
+<div class="page" id="page-calendar">
+  <div class="cal-page-inner">
+    <div class="cal-page-hdr">
+      <div class="cal-page-title">活动<span>日历</span></div>
+      <div class="cal-legend2">
+        <div class="cal-legend2-item"><div class="cal-legend2-swatch" style="background:#bbf7d0;border:1px solid #86efac;"></div>1个营</div>
+        <div class="cal-legend2-item"><div class="cal-legend2-swatch" style="background:#4ade80;"></div>2个营</div>
+        <div class="cal-legend2-item"><div class="cal-legend2-swatch" style="background:#22c55e;"></div>3个营</div>
+        <div class="cal-legend2-item"><div class="cal-legend2-swatch" style="background:#16a34a;"></div>4个及以上</div>
+      </div>
+    </div>
+    <div class="cal-months-grid" id="calMonthsGrid"></div>
+  </div>
+</div>
+
+<!-- Floating tooltip -->
+<div class="cal-tip" id="calTip"></div>
+
+<script>
+let allEntries = [];
+let sortDir = 'asc';
+let currentRawText = '';
+
+// ── Date helpers ──────────────────────────────────────────────
+function localStr(d) {
+  // Always use LOCAL date — avoids UTC-offset shifting toISOString() causes
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function today() {
+  return localStr(new Date());
+}
+function daysDiff(dateStr) {
+  if (!dateStr) return null;
+  const diff = (new Date(dateStr) - new Date(today())) / 86400000;
+  return Math.ceil(diff);
+}
+function fmtDate(d) {
+  return d || '—';
+}
+function toApiDate(v) {
+  return (v && v.trim()) ? v.trim() : null;
+}
+function fromApiDate(v) {
+  return v || '';
+}
+
+// ── Status badge ──────────────────────────────────────────────
+function statusBadge(entry) {
+  const re = entry.registration_end;
+  const rs = entry.registration_start;
+  if (!re) return { cls: 'badge-unknown', text: '未知截止' };
+  const d = daysDiff(re);
+  if (d < 0) return { cls: 'badge-expired', text: '已过期' };
+  if (d <= 7) return { cls: 'badge-urgent', text: d === 0 ? '今日截止' : `${d}天后截止` };
+  if (rs && rs <= today()) return { cls: 'badge-open', text: '报名中' };
+  return { cls: 'badge-upcoming', text: '未开始' };
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderList() {
+  const list = [...allEntries].sort((a, b) => {
+    const da = a.registration_end || '9999-99-99';
+    const db = b.registration_end || '9999-99-99';
+    return sortDir === 'asc' ? da.localeCompare(db) : db.localeCompare(da);
+  });
+
+  document.getElementById('countBadge').textContent = list.length;
+  document.getElementById('listLoading').classList.remove('visible');
+  const emptyEl = document.getElementById('emptyState');
+  const listEl = document.getElementById('entryList');
+
+  if (list.length === 0) {
+    emptyEl.classList.add('visible');
+    listEl.innerHTML = '';
+    return;
+  }
+  emptyEl.classList.remove('visible');
+
+  const daysBox = entry => {
+    const re = entry.registration_end;
+    const rs = entry.registration_start;
+    if (!re) return `<div class="days-box unknown"><span class="days-box-num">?</span><span class="days-box-unit">天</span><span class="days-box-label">未知截止</span></div>`;
+    const d = daysDiff(re);
+    if (d < 0) return `<div class="days-box expired"><span class="days-box-num">${Math.abs(d)}</span><span class="days-box-unit">天前</span><span class="days-box-label">已过期</span></div>`;
+    if (d === 0) return `<div class="days-box urgent"><span class="days-box-num">今</span><span class="days-box-unit">&nbsp;</span><span class="days-box-label">今日截止</span></div>`;
+    if (d <= 7) return `<div class="days-box urgent"><span class="days-box-num">${d}</span><span class="days-box-unit">天</span><span class="days-box-label">即将截止</span></div>`;
+    if (rs && rs <= today()) return `<div class="days-box open"><span class="days-box-num">${d}</span><span class="days-box-unit">天</span><span class="days-box-label">报名中</span></div>`;
+    return `<div class="days-box upcoming"><span class="days-box-num">${d}</span><span class="days-box-unit">天</span><span class="days-box-label">未开始</span></div>`;
+  };
+
+  listEl.innerHTML = list.map(e => {
+    const b = statusBadge(e);
+    const isUrgent = b.cls === 'badge-urgent';
+    const isExpired = b.cls === 'badge-expired';
+    const regPeriod = e.registration_start && e.registration_end
+      ? `${e.registration_start} ~ <span class="date-value deadline">${e.registration_end}</span>`
+      : e.registration_end
+        ? `截止 <span class="date-value deadline">${e.registration_end}</span>`
+        : '<span style="color:var(--text-muted)">未知</span>';
+    const actPeriod = e.activity_start && e.activity_end
+      ? `${e.activity_start} ~ ${e.activity_end}`
+      : e.activity_start || e.activity_end || '—';
+
+    return `<div class="entry-card${isUrgent ? ' urgent' : ''}${isExpired ? ' expired' : ''}" id="card-${e.id}" style="display:flex;gap:16px;align-items:center;">
+      <div style="flex:1;min-width:0;">
+        <div class="card-header" style="margin-bottom:6px;">
+          <div class="card-school-info">
+            <div class="card-school">${esc(e.school)}</div>
+            ${e.institute ? `<div class="card-institute">${esc(e.institute)}</div>` : ''}
+          </div>
+        </div>
+        <div class="card-program">${esc(e.program_name)}</div>
+        <div class="card-dates">
+          <div class="date-row">
+            <span class="date-label">报名</span>
+            <span class="date-value">${regPeriod}</span>
+          </div>
+          <div class="date-row">
+            <span class="date-label">活动</span>
+            <span class="date-value">${actPeriod}</span>
+          </div>
+        </div>
+        ${e.notes ? `<div class="card-notes" style="margin-top:8px;">💬 ${esc(e.notes)}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        ${daysBox(e)}
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div class="delete-confirm" id="dc-${e.id}" style="flex-direction:column;gap:4px;padding:6px 8px;">
+            <span style="font-size:11px;white-space:nowrap;">确认删除？</span>
+            <button class="btn btn-confirm" onclick="confirmDelete('${e.id}')">确认</button>
+            <button class="btn btn-cancel-sm" onclick="cancelDelete('${e.id}')">取消</button>
+          </div>
+          <button class="delete-btn-icon" onclick="askDelete('${e.id}')" title="删除">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Load entries ──────────────────────────────────────────────
+async function loadEntries() {
+  try {
+    const res = await fetch('/api/entries');
+    allEntries = await res.json();
+    renderList();
+  } catch (e) {
+    document.getElementById('listLoading').textContent = '加载失败，请刷新页面';
+  }
+}
+
+// ── Sort ──────────────────────────────────────────────────────
+function setSort(dir) {
+  sortDir = dir;
+  document.getElementById('sortAsc').classList.toggle('active', dir === 'asc');
+  document.getElementById('sortDesc').classList.toggle('active', dir === 'desc');
+  renderList();
+}
+
+// ── Extract ───────────────────────────────────────────────────
+async function doExtract() {
+  const text = document.getElementById('rawText').value.trim();
+  if (!text) { showExtractError('请先粘贴通知文本'); return; }
+  currentRawText = text;
+  hideExtractError();
+  const btn = document.getElementById('extractBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> 提取中...';
+  try {
+    const res = await fetch('/api/extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || '提取失败');
+    }
+    const data = await res.json();
+    fillForm(data);
+    showForm();
+  } catch (e) {
+    showExtractError(e.message || '网络错误，请重试');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ 提取信息';
+  }
+}
+
+function fillForm(data) {
+  document.getElementById('f_school').value = data.school || '';
+  document.getElementById('f_institute').value = data.institute || '';
+  document.getElementById('f_program').value = data.program_name || '';
+  document.getElementById('f_reg_start').value = fromApiDate(data.registration_start);
+  document.getElementById('f_reg_end').value = fromApiDate(data.registration_end);
+  document.getElementById('f_act_start').value = fromApiDate(data.activity_start);
+  document.getElementById('f_act_end').value = fromApiDate(data.activity_end);
+  document.getElementById('f_notes').value = '';
+}
+
+function showForm() { document.getElementById('confirmForm').classList.add('visible'); }
+function hideForm() { document.getElementById('confirmForm').classList.remove('visible'); hideSaveError(); }
+function showExtractError(msg) { const el = document.getElementById('extractError'); el.textContent = msg; el.classList.add('visible'); }
+function hideExtractError() { document.getElementById('extractError').classList.remove('visible'); }
+function showSaveError(msg) { const el = document.getElementById('saveError'); el.textContent = msg; el.classList.add('visible'); }
+function hideSaveError() { document.getElementById('saveError').classList.remove('visible'); }
+
+function doReExtract() {
+  hideForm();
+  document.getElementById('rawText').value = '';
+  document.getElementById('rawText').focus();
+}
+
+// ── Save ──────────────────────────────────────────────────────
+async function doSave() {
+  const school = document.getElementById('f_school').value.trim();
+  const program = document.getElementById('f_program').value.trim();
+  if (!school) { showSaveError('请填写学校名称'); return; }
+  if (!program) { showSaveError('请填写项目名称'); return; }
+  hideSaveError();
+
+  const body = {
+    school,
+    institute: document.getElementById('f_institute').value.trim(),
+    program_name: program,
+    registration_start: toApiDate(document.getElementById('f_reg_start').value),
+    registration_end: toApiDate(document.getElementById('f_reg_end').value),
+    activity_start: toApiDate(document.getElementById('f_act_start').value),
+    activity_end: toApiDate(document.getElementById('f_act_end').value),
+    notes: document.getElementById('f_notes').value.trim(),
+    raw_text: currentRawText,
+  };
+
+  try {
+    const res = await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.status === 409) { showSaveError('该项目已存在（项目名称和报名截止日期相同），请勿重复添加'); return; }
+    if (!res.ok) throw new Error('保存失败');
+    const entry = await res.json();
+    allEntries.push(entry);
+    renderList();
+    hideForm();
+    document.getElementById('rawText').value = '';
+    currentRawText = '';
+  } catch (e) {
+    showSaveError(e.message || '保存失败，请重试');
+  }
+}
+
+// ── Delete ────────────────────────────────────────────────────
+function askDelete(id) {
+  document.getElementById(`dc-${id}`).classList.add('visible');
+}
+function cancelDelete(id) {
+  document.getElementById(`dc-${id}`).classList.remove('visible');
+}
+async function confirmDelete(id) {
+  const card = document.getElementById(`card-${id}`);
+  card.classList.add('fading');
+  try {
+    await fetch(`/api/entries/${id}`, { method: 'DELETE' });
+    allEntries = allEntries.filter(e => e.id !== id);
+    setTimeout(() => { card.remove(); renderList(); }, 300);
+  } catch (e) {
+    card.classList.remove('fading');
+    cancelDelete(id);
+    alert('删除失败，请重试');
+  }
+}
+
+// ── Page switching ────────────────────────────────────────────
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'calendar') renderCalendar();
+}
+
+// ── Calendar ──────────────────────────────────────────────────
+const CAL_MONTH_NAMES = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const CAL_WDAYS = ['日','一','二','三','四','五','六'];
+const CAL_MONTHS_SHOWN = 12; // render this many months starting from current
+
+function buildActMap() {
+  const map = {};
+  allEntries.forEach(e => {
+    if (!e.activity_start || !e.activity_end) return;
+    // Parse as local date by splitting — avoids UTC-offset shift from new Date("YYYY-MM-DD")
+    const [sy, sm, sd] = e.activity_start.split('-').map(Number);
+    const [ey, em, ed] = e.activity_end.split('-').map(Number);
+    const cur = new Date(sy, sm - 1, sd);
+    const end = new Date(ey, em - 1, ed);
+    while (cur <= end) {
+      const key = localStr(cur);
+      if (!map[key]) map[key] = [];
+      map[key].push(e);
+      cur.setDate(cur.getDate() + 1);
+    }
+  });
+  return map;
+}
+
+function renderCalendar() {
+  const actMap  = buildActMap();
+  const todayStr = today();
+  const now = new Date();
+  const grid = document.getElementById('calMonthsGrid');
+
+  let html = '';
+  for (let offset = 0; offset < CAL_MONTHS_SHOWN; offset++) {
+    let y = now.getFullYear();
+    let m = now.getMonth() + offset;
+    while (m > 11) { m -= 12; y++; }
+
+    const isThisMonth = (y === now.getFullYear() && m === now.getMonth());
+    const firstDay = new Date(y, m, 1);
+    const lastDate = new Date(y, m + 1, 0).getDate();
+    const startOffset = firstDay.getDay(); // 0=Sun
+    const totalCells = Math.ceil((startOffset + lastDate) / 7) * 7;
+
+    // Weekday header
+    const wdHeader = CAL_WDAYS.map((d, i) =>
+      `<div class="cal-wd${i===0||i===6?' wknd':''}">${d}</div>`
+    ).join('');
+
+    // Day cells
+    let cells = '';
+    for (let i = 0; i < totalCells; i++) {
+      const dayNum   = i - startOffset + 1;
+      const cellDate = new Date(y, m, dayNum);
+      const dateStr  = localStr(cellDate);
+      const inMonth  = cellDate.getMonth() === m;
+      const isToday  = dateStr === todayStr;
+      const camps    = inMonth ? (actMap[dateStr] || []) : [];
+      const count    = camps.length;
+      const cCls     = count >= 4 ? 'c4' : count === 3 ? 'c3' : count === 2 ? 'c2' : count === 1 ? 'c1' : '';
+      const dots     = count > 0 ? Array(Math.min(count, 4)).fill('<div class="cal-dot"></div>').join('') : '';
+      // Tooltip data encoded safely
+      const tipData  = camps.map(e => `${e.school}｜${e.program_name}`).join('\n');
+      const tipAttr  = count > 0
+        ? `data-tip="${dateStr}" data-camps="${tipData.replace(/"/g,'&quot;')}"`
+        : '';
+
+      cells += `<div class="cal-cell${inMonth?'':' other-m'}${count>0?' act '+cCls:''}${isToday?' is-today':''}" ${tipAttr}>
+        <div class="cal-dnum">${cellDate.getDate()}</div>
+        ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+      </div>`;
+    }
+
+    html += `<div class="cal-mcard">
+      <div class="cal-mcard-hdr">
+        <span class="cal-mname">${CAL_MONTH_NAMES[m]}</span>
+        <span class="cal-myear">${y}</span>
+        ${isThisMonth ? '<span class="cal-mcard-today-tag">本月</span>' : ''}
+      </div>
+      <div class="cal-wrow">${wdHeader}</div>
+      <div class="cal-cells">${cells}</div>
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+// ── Tooltip ───────────────────────────────────────────────────
+const calTip = document.getElementById('calTip');
+function calTipEnter(e) {
+  const cell = e.target.closest('.cal-cell[data-tip]');
+  if (!cell) return;
+  const dateStr = cell.dataset.tip;
+  const camps   = cell.dataset.camps || '';
+  const lines   = camps.split('\n').filter(Boolean);
+  calTip.innerHTML = `<div class="cal-tip-date">${dateStr}</div>` +
+    lines.map(l => `<div class="cal-tip-item"><div class="cal-dot cal-tip-dot"></div><span>${l}</span></div>`).join('');
+  calTip.classList.add('show');
+  positionTip(e);
+}
+function calTipLeave(e) {
+  const cell = e.target.closest('.cal-cell[data-tip]');
+  if (!cell) return;
+  calTip.classList.remove('show');
+}
+function positionTip(e) {
+  const x = e.clientX + 16, y = e.clientY + 16;
+  const tw = calTip.offsetWidth || 220, th = calTip.offsetHeight || 60;
+  calTip.style.left = (x + tw > window.innerWidth  ? e.clientX - tw - 12 : x) + 'px';
+  calTip.style.top  = (y + th > window.innerHeight ? e.clientY - th - 12 : y) + 'px';
+}
+document.addEventListener('mousemove', e => { if (calTip.classList.contains('show')) positionTip(e); });
+
+// ── Init ──────────────────────────────────────────────────────
+// Calendar tooltip delegation — set up once
+const _calGrid = document.getElementById('calMonthsGrid');
+_calGrid.addEventListener('mouseenter', calTipEnter, true);
+_calGrid.addEventListener('mouseleave', calTipLeave, true);
+
+loadEntries();
+</script>
+</body>
+</html>
